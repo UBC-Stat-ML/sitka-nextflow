@@ -2,9 +2,13 @@
 
 deliverableDir = 'deliverables/' + workflow.scriptName.replace('.nf','')
 
-params.binaryMarkers
+params.binaryMarkers = null
 
 binaryMarkers = file(params.binaryMarkers)
+
+if (binaryMarkers == null) {
+  throw new RuntimeException("Set --binaryMarkers to the input.")
+}
 
 process buildCode {
   cache true 
@@ -21,11 +25,13 @@ process buildCode {
 
 
 process inference {
+  echo true
   input:
     file code
     file binaryMarkers
     env JAVA_OPTS from '-Xmx10g'
   """
+  echo OK
   code/bin/corrupt-infer-with-noisy-params  \
     --model.binaryMatrix $binaryMarkers \
     --model.globalParameterization false \
@@ -34,7 +40,7 @@ process inference {
     --model.minBound 0.001 \
     --engine PT \
     --engine.nChains 50 \
-    --engine.nScans 10 \
+    --engine.nScans 100 \
     --engine.thinning 1 \
     --postProcessor corrupt.post.CorruptPostProcessor \
     --model.samplerOptions.useCellReallocationMove true \
