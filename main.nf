@@ -15,7 +15,7 @@ process buildCode {
   input:
     val gitRepoName from 'nowellpack'
     val gitUser from 'UBC-Stat-ML'
-    val codeRevision from 'e2871bcc011b61c44cb6901240061bb546962dc9'
+    val codeRevision from '93b8873acadd85ada03ef4765738617d92e64036'
     val snapshotPath from "${System.getProperty('user.home')}/w/nowellpack"
   output:
     file 'code' into code
@@ -34,16 +34,17 @@ process inference {
   echo OK
   code/bin/corrupt-infer-with-noisy-params  \
     --model.binaryMatrix $binaryMarkers \
-    --model.globalParameterization false \
+    --model.globalParameterization true \
     --model.fprBound 0.5 \
     --model.fnrBound 0.5 \
     --model.minBound 0.001 \
     --engine PT \
-    --engine.nChains 50 \
-    --engine.nScans 100 \
-    --engine.thinning 1 \
+    --engine.nChains 100 \
+    --engine.nScans 100000 \
+    --engine.thinning 100 \
     --postProcessor corrupt.post.CorruptPostProcessor \
     --model.samplerOptions.useCellReallocationMove true \
+    --model.samplerOptions.useMiniMoves true \
     --postProcessor.runPxviz true \
     --experimentConfigs.tabularWriter.compressed true \
     --engine.nPassesPerScan 0.5 \
